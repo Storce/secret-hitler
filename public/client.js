@@ -59,6 +59,9 @@ joinBtn.addEventListener('click', () => {
     }
 
     joinError.innerText = '';
+    localStorage.setItem('sh_role', role);
+    localStorage.setItem('sh_name', name);
+    localStorage.setItem('sh_secret', secretWord);
     socket.emit('join', { role, name, secretWord });
 });
 
@@ -239,5 +242,16 @@ socket.on('state_update', (data) => {
 socket.on('players_update', (players) => {
     if (currentRole === 'admin') {
         updateAdminUI({ players });
+    }
+});
+
+// Auto-reconnect flow when socket reconnects
+socket.on('connect', () => {
+    const role = localStorage.getItem('sh_role');
+    const name = localStorage.getItem('sh_name');
+    const secretWord = localStorage.getItem('sh_secret');
+    if (name && secretWord) {
+        currentRole = role || 'player';
+        socket.emit('join', { role: currentRole, name, secretWord });
     }
 });

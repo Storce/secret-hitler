@@ -14,7 +14,10 @@ const ADMIN_PASSWORD = 'admin';
 
 let gameState = 'lobby'; // 'lobby', 'voting', 'result'
 let round = 1;
-let players = {}; // Object mapping socket.id -> { name, hasVoted: boolean, voteChoice: boolean | null }
+// Map playerName -> { name, hasVoted, voteChoice, connected }
+let players = {}; 
+// Map socket.id -> playerName
+let socketToName = {}; 
 let adminSockets = new Set();
 
 function broadcastToAdmins(event, data) {
@@ -41,15 +44,44 @@ io.on('connection', (socket) => {
             if (secretWord !== SECRET_WORD) {
                 return socket.emit('join_error', 'Invalid secret word');
             }
-            if (gameState !== 'lobby') {
-                return socket.emit('join_error', 'Game has already started. Cannot join now.');
+            
+            // Reconnecting player
+            if (players[name]) {
+                players[name].connected = true;
+                socketToName[socket.id] = name;
+                socket.emit('joined', { gameState, round });
+                
+                if (gameState === 'voting' && players[name].hasVoted) {
+                    socket.emit('vote_confirmed');
+                }
+                
+                if (gameState === 'result') {
+                    // Calculate results and catch them up
+                    let yesVotes = 0; let noVotes = 0;
+                    for (let n in players) {
+                        if (players[n].voteChoice === true) yesVotes++;
+                        else if (players[n].voteChoice === false) noVotes++;
+                    }
+                    socket.emit('state_update', { 
+                        gameState, round, 
+                        results: { yes: yesVotes, no: noVotes, pass: yesVotes > noVotes }
+                    });
+                }
+                broadcastToAdmins('players_update', players);
+            } 
+            // New player
+            else {
+                if (gameState !== 'lobby') {
+                    return socket.emit('join_error', 'Game has already started. Cannot join now.');
+                }
+                
+                players[name] = { name, hasVoted: false, voteChoice: null, connected: true };
+                socketToName[socket.id] = name;
+                socket.emit('joined', { gameState, round });
+                
+                // Notify admins
+                broadcastToAdmins('players_update', players);
             }
-            
-            players[socket.id] = { name, hasVoted: false, voteChoice: null };
-            socket.emit('joined', { gameState, round });
-            
-            // Notify admins
-            broadcastToAdmins('players_update', players);
         }
     });
 
@@ -59,9 +91,9 @@ io.on('connection', (socket) => {
         
         gameState = 'voting';
         // Reset votes
-        for (let id in players) {
-            players[id].hasVoted = false;
-            players[id].voteChoice = null;
+        for (let name in players) {
+            players[name].hasVoted = false;
+            players[name].voteChoice = null;
         }
         
         io.emit('state_update', { gameState, round, players });
@@ -69,9 +101,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('vote', (voteSelection) => {
-        if (players[socket.id] && gameState === 'voting' && !players[socket.id].hasVoted) {
-            players[socket.id].hasVoted = true;
-            players[socket.id].voteChoice = voteSelection; // true for JA, false for NEIN
+        const name = socketToName[socket.id];
+        if (name && players[name] && gameState === 'voting' && !players[name].hasVoted) {
+            players[name].hasVoted = true;
+            players[name].voteChoice = voteSelection; // true for JA, false for NEIN
             socket.emit('vote_confirmed');
             
             broadcastToAdmins('players_update', players);
@@ -90,9 +123,9 @@ io.on('connection', (socket) => {
         
         let yesVotes = 0;
         let noVotes = 0;
-        for (let id in players) {
-            if (players[id].voteChoice === true) yesVotes++;
-            else if (players[id].voteChoice === false) noVotes++;
+        for (let name in players) {
+            if (players[name].voteChoice === true) yesVotes++;
+            else if (players[name].voteChoice === false) noVotes++;
         }
         
         const isPass = yesVotes > noVotes; // standard simple majority logic
@@ -112,9 +145,9 @@ io.on('connection', (socket) => {
         round++;
         
         // Reset votes
-        for (let id in players) {
-            players[id].hasVoted = false;
-            players[id].voteChoice = null;
+        for (let name in players) {
+            players[name].hasVoted = false;
+            players[name].voteChoice = null;
         }
         
         io.emit('state_update', { gameState, round, players });
@@ -126,10 +159,10 @@ io.on('connection', (socket) => {
         
         gameState = 'lobby';
         round = 1;
-        players = {}; // Disconnect/kick everyone? Or just let them be? Design says "reset and restart the game". Let's clear players so they have to rejoin. Or we can just keep players and reset state.
-        // Actually, if we clear players, we need to notify them to refresh.
+        players = {}; 
+        socketToName = {};
+        
         io.emit('force_reload');
-        players = {};
         
         broadcastToAdmins('players_update', players);
         broadcastToAdmins('state_update', { gameState, round });
@@ -138,9 +171,13 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         if (adminSockets.has(socket.id)) {
             adminSockets.delete(socket.id);
-        } else if (players[socket.id]) {
-            delete players[socket.id];
-            broadcastToAdmins('players_update', players);
+        } else if (socketToName[socket.id]) {
+            const name = socketToName[socket.id];
+            if (players[name]) {
+                players[name].connected = false;
+                broadcastToAdmins('players_update', players);
+            }
+            delete socketToName[socket.id];
         }
     });
 });
