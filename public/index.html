@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secret Voting</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Germania+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        
+        <!-- LOGIN SCREEN -->
+        <div id="login-view" class="view active">
+            <h1 class="logo">Secret Voting</h1>
+            <div class="card">
+                <h2>Join Game</h2>
+                <button id="toggle-admin-btn" class="text-link">I am the Admin</button>
+                <div class="form-group" id="name-group">
+                    <label for="player-name">Your Name</label>
+                    <input type="text" id="player-name" placeholder="Enter name">
+                </div>
+                <div class="form-group">
+                    <label id="secret-word-label" for="secret-word">Secret Word</label>
+                    <input type="password" id="secret-word" placeholder="Enter word">
+                </div>
+                <button id="join-btn" class="btn btn-primary">Join</button>
+                <p id="join-error" class="error-text"></p>
+            </div>
+        </div>
+
+        <!-- PLAYER VIEWS -->
+        <div id="player-view" class="view">
+            <!-- LOBBY -->
+            <div id="player-lobby" class="sub-view">
+                <div class="card central-card">
+                    <h2>Lobby</h2>
+                    <p>Wait for the admin to start the game.</p>
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- VOTING -->
+            <div id="player-voting" class="sub-view">
+                <h2 class="round-title">Round <span id="player-round-display"></span></h2>
+                <div class="card central-card">
+                    <h3>Cast your Vote</h3>
+                    <div class="vote-buttons" id="vote-buttons">
+                        <button class="btn btn-ja" onclick="selectVote(true)">JA!</button>
+                        <button class="btn btn-nein" onclick="selectVote(false)">NEIN</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CONFIRMATION DIALOG -->
+            <div id="vote-confirm-modal" class="modal">
+                <div class="modal-content card">
+                    <h3>Confirm Vote?</h3>
+                    <p>You are voting <strong id="confirm-vote-text"></strong></p>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="cancelVote()">Cancel</button>
+                        <button class="btn btn-primary" onclick="submitVote()">Confirm</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="player-voted-wait" class="sub-view">
+                <div class="card central-card">
+                    <h2>Vote Cast</h2>
+                    <p>Waiting for others to finish voting.</p>
+                </div>
+            </div>
+
+            <!-- RESULT -->
+            <div id="player-result" class="sub-view">
+                <h2 class="round-title">Round <span id="result-round-display"></span> Result</h2>
+                <div class="card central-card">
+                    <div class="result-status" id="result-status"></div>
+                    <div class="result-stats">
+                        <div class="stat"><span class="stat-lbl">JA:</span> <strong id="res-ja"></strong></div>
+                        <div class="stat"><span class="stat-lbl">NEIN:</span> <strong id="res-nein"></strong></div>
+                    </div>
+                    <p class="wait-text">Waiting for Admin to continue...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN DESK -->
+        <div id="admin-view" class="view">
+            <div class="admin-header">
+                <h2>Admin Dashboard</h2>
+                <div class="admin-controls">
+                    <button class="btn btn-danger btn-sm" onclick="showRestartConfirm()">Restart Game</button>
+                </div>
+            </div>
+
+            <div id="admin-restart-modal" class="modal">
+                <div class="modal-content card">
+                    <h3>Restart Game?</h3>
+                    <p>This will kick everyone and reset all rounds.</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeRestartConfirm()">Cancel</button>
+                        <button class="btn btn-danger" onclick="executeRestart()">Conform Restart</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="state-header">
+                    <h3>Current State: <span id="admin-state-label">Lobby</span></h3>
+                    <h3 id="admin-round-container">Round <span id="admin-round-display">1</span></h3>
+                </div>
+                
+                <div id="admin-actions" class="admin-actions">
+                    <!-- Actions will be injected here via JS -->
+                </div>
+
+                <h3>Players</h3>
+                <ul id="admin-players-list" class="players-list">
+                    <!-- Players injected here -->
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+:root {
+    --bg-color: #f5eedc; /* yellowed paper background */
+    --card-bg: #fffbf0;
+    --primary: #d35400; /* orange highlight */
+    --primary-hover: #e67e22;
+    --text-main: #2c3e50;
+    --secondary-text: #7f8c8d;
+    --ja-color: #27ae60;
+    --nein-color: #c0392b;
+    --border-color: #e0d5ba;
+    
+    --font-heading: 'Germania One', cursive;
+    --font-body: 'Roboto', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-body);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-heading);
+    color: var(--primary);
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+.logo {
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.app-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+.view {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.view.active {
+    display: block;
+}
+
+.sub-view {
+    display: none;
+}
+.sub-view.active {
+    display: block;
+}
+
+/* CARDS */
+.card {
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
+}
+
+.central-card {
+    text-align: center;
+}
+
+/* FORMS */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--text-main);
+}
+
+input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: var(--font-body);
+    background-color: #faf7ef;
+}
+input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+/* BUTTONS */
+.btn {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    font-family: var(--font-body);
+}
+.btn:active {
+    transform: scale(0.98);
+}
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+.btn-secondary {
+    background-color: var(--secondary-text);
+    color: white;
+}
+.btn-danger {
+    background-color: var(--nein-color);
+    color: white;
+}
+.btn-sm {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    width: auto;
+}
+.btn-ja {
+    background-color: var(--ja-color);
+    color: white;
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    border: 3px solid #1e8449;
+}
+.btn-nein {
+    background-color: var(--nein-color);
+    color: white;
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    border: 3px solid #922b21;
+}
+
+.text-link {
+    background: none;
+    border: none;
+    color: var(--primary);
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: block;
+    text-align: right;
+}
+
+/* OTHERS */
+.error-text {
+    color: var(--nein-color);
+    margin-top: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.round-title {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.vote-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.spinner {
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* MODALS */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+}
+.modal.active {
+    display: flex;
+}
+.modal-content {
+    width: 90%;
+    max-width: 400px;
+}
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* ADMIN VIEW */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.state-header {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+.players-list {
+    list-style: none;
+    margin-top: 1rem;
+}
+.players-list li {
+    padding: 0.8rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+}
+.voted-badge.yes {
+    color: var(--ja-color);
+    font-weight: bold;
+}
+.voted-badge.no {
+    color: var(--secondary-text);
+}
+
+/* RESULTS */
+.result-status {
+    font-family: var(--font-heading);
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+.result-status.pass { color: var(--ja-color); }
+.result-status.fail { color: var(--nein-color); }
+
+.result-stats {
+    display: flex;
+    justify-content: space-around;
+    font-size: 1.5rem;
+    margin-top: 1rem;
+}
+.stat-lbl {
+    font-weight: normal;
+    font-size: 1rem;
+    color: var(--secondary-text);
+}
+.wait-text {
+    margin-top: 2rem;
+    color: var(--secondary-text);
+    font-size: 0.9rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
